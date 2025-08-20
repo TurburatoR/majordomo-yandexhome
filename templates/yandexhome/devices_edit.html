@@ -289,6 +289,25 @@ function addReportable(prop_name,split = false) {
         }
 }
 
+
+function addInvert(prop_name,invert) {
+        traits = tryParseJSON($('#traits_json').val());
+//        instance = tryParseJSON($('#instance_json').val());
+             if(!traits[prop_name]['invert']) {
+                     traits[prop_name]['invert'] = true;
+                     //Красим кнопку
+                     $('.invertBtn#'+prop_name+'>i').attr('style', 'color:green;');
+             } else {
+                     traits[prop_name]['invert'] = false;
+                     //Красим кнопку
+                     $('.invertBtn#'+prop_name+'>i').attr('style', 'color: #959595;');
+             }
+        //Запишем обратно в поле
+        $('#traits_json').val(JSON.stringify(traits));
+//        $('#instance_json').val(JSON.stringify(instance));
+}
+
+
 function renderTraitsTable() {
    $('#traits_table tr').remove();
    isPopover = false;
@@ -299,6 +318,7 @@ function renderTraitsTable() {
          let linked_property = traits_list[key].linked_property;
          let linked_description = traits_list[key].description;
          let reportable = traits_list[key].reportable;
+         let invert = traits_list[key].invert;
          let split = false;
          if (key == 'on') {
            let capabilities = dev_config.capabilities;
@@ -317,7 +337,7 @@ function renderTraitsTable() {
            }
          }
          // Формируем строки в таблице метрик.
-         addTraitRow(linked_type, linked_description, linked_object, linked_property, reportable, split);
+         addTraitRow(linked_type, linked_description, linked_object, linked_property, reportable, split, invert);
          objects_list[linked_object] = '';
       }
    }
@@ -370,7 +390,7 @@ function renderObjectSelectbox(id, selected = '') {
    }
 }
 
-function addTraitRow(linked_type, linked_description, linked_object, linked_property, reportable = false, split = false) {
+function addTraitRow(linked_type, linked_description, linked_object, linked_property, reportable = false, split = false, invert = false) {
    // Строка с наименование метрики.
    let row = $('<tr id="table_titlerow' + linked_type + '"/>');
    $('#traits_table').append(row);
@@ -415,8 +435,14 @@ function addTraitRow(linked_type, linked_description, linked_object, linked_prop
    }
 
 
+   let invert_options = '';
+      if (typeof(instance_list[linked_type].parameters) != 'undefined' && instance_list[linked_type].parameters !== null) {
+         var invert_color = (invert) ? "color: green" : 'color: #959595;';
+         invert_options =
+         `<span title="Инвертировать значения" id="${linked_type}" class="btn btn-link invertBtn" onclick="addInvert($(this).attr(\'id\'),true);"><i class="glyphicon glyphicon glyphicon-random" style="${invert_color}"></i></span>`;
+   }
    // Кнопка удаления метрики.
-   row.append($(`<td style="display: flex"><span id="${linked_type}" class="btn btn-link" onclick="deleteTrait($(this).attr(\'id\'));"><i class="glyphicon glyphicon-trash"></i></span>[#if SKILL_ACCESS_TOKEN != ''#]<span title="Система будет автоматически отправлять изменения в Яндекс. (Требуется настройка)" id="${linked_type}" class="btn btn-link reportableBtn" onclick="addReportable($(this).attr(\'id\'));"><i class="glyphicon glyphicon-retweet" style="${reportable_color}"></i></span>[#endif#]${split_options}</td>`));
+   row.append($(`<td style="display: flex"><span id="${linked_type}" class="btn btn-link" onclick="deleteTrait($(this).attr(\'id\'));"><i class="glyphicon glyphicon-trash"></i></span>[#if SKILL_ACCESS_TOKEN != ''#]<span title="Система будет автоматически отправлять изменения в Яндекс. (Требуется настройка)" id="${linked_type}" class="btn btn-link reportableBtn" onclick="addReportable($(this).attr(\'id\'));"><i class="glyphicon glyphicon-retweet" style="${reportable_color}"></i></span>[#endif#]${split_options}${invert_options}</td>`));
 }
 
 function addTrait() {
@@ -432,6 +458,7 @@ function addTrait() {
       traits_list[trait_type].linked_object = '';
       traits_list[trait_type].linked_property = '';
       traits_list[trait_type].reportable = false;
+      traits_list[trait_type].invert = false;
       saveTraitsList();
 
       isPopover = false;
