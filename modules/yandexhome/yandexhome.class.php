@@ -598,6 +598,8 @@ class yandexhome extends module
                           }
                           switch ($trait['type']) {
                               case 'on':
+                                 $state['value'] = ($trait['invert'] === true) ? (int)!$value : $value;
+                                 break;
                               case 'mute':
                               case 'pause':
                               case 'backlight':
@@ -641,6 +643,8 @@ class yandexhome extends module
                                  $state['value'] = (gg($trait['linked_object'].'.ncno') == 'nc' ? ($value ? 'closed' : 'opened') : ($value ? 'opened' : 'closed'));
                                  break;
                               case 'open':
+                                 $state['value'] = ($trait['invert'] === true) ? 100 - $value : $value;
+                                 break;
                               case 'volume':
                               case 'channel':
                               case 'humidity':
@@ -777,6 +781,8 @@ class yandexhome extends module
                   }
                   switch ($trait['type']) {
                      case 'on':
+                        $state['value'] = ($trait['invert'] === true) ? !$value : $value;
+                        break;
                      case 'mute':
                      case 'pause':
                      case 'backlight':
@@ -820,6 +826,8 @@ class yandexhome extends module
                         $state['value'] = (gg($trait['linked_object'].'.ncno') == 'nc' ? ($value ? 'closed' : 'opened') : ($value ? 'opened' : 'closed'));
                         break;
                      case 'open':
+                        $state['value'] = ($trait['invert'] === true) ? 100 - $value : $value;
+                        break;
                      case 'volume':
                      case 'channel':
                      case 'humidity':
@@ -920,9 +928,14 @@ class yandexhome extends module
 
                   switch ($instance) {
                      case 'on':
+                        $value = ($traits[$instance]['invert'] === true) ? !$value : $value;
+                        break;
                      case 'mute':
                      case 'pause':
                      case 'backlight':
+                     case 'open':
+                        $value = ($traits[$instance]['invert'] === true) ? 100 - $value : $value;
+                        break;
                      case 'keep_warm':
                      case 'ionization':
                      case 'oscillation':
